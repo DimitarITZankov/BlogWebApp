@@ -1,0 +1,49 @@
+{%extends 'base.html'%}
+{%block content%}
+{% for message in get_flashed_messages() %}
+<div class="alert alert-warning alert-dismissible fade show" role="aler">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+
+<div class="shadow p-3 mb-5 bg-body-tertiary rounded">
+<form method="POST">
+    <h3>Register: </h3><br/><br/>
+    {{ form.hidden_tag() }}
+    {{ form.name.label(class="form-label") }}
+    {{ form.name(class="form-control") }}
+    <br/>
+    {{ form.username.label(class="form-label") }}
+    {{ form.username(class="form-control") }}
+    <br/>
+    {{ form.email.label(class="form-label") }}
+    {{ form.email(class="form-control") }}
+    <br/>
+    {{ form.secret_word.label(class="form-label") }}
+    {{ form.secret_word(class="form-control") }}
+    <br/>
+    {{ form.password_hash.label(class="form-label") }}
+    {{ form.password_hash(class="form-control") }}
+    <br/>
+    {{ form.password_hash2.label(class="form-label") }}
+    {{ form.password_hash2(class="form-control") }}
+    <br/>
+    {{ form.submit(class="btn btn-secondary") }}
+</form>
+</div>
+
+<table class="table table-striped">
+{% for user in all_users %}
+<tr>
+<td><h4>User ID: {{user.id}}    <a href="{{ url_for('remove_user',id=user.id) }}">Delete</a>
+<a href="{{ url_for('edit_user',id=user.id) }}">Edit</a></h4>
+<strong>Name: </strong>{{user.name}}<br/>
+<strong>Username: </strong>{{user.username}}<br/>
+<strong>Email: </strong>{{user.email}}<br/>
+<strong>Password: </strong>{{ user.password_hash }}<br/>
+<strong>Secret Word: </strong>{{ user.secret_word }}</td><br/>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

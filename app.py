@@ -123,9 +123,12 @@ def register():
 @app.route('/remove_user/<int:id>')
 def remove_user(id):
     user_to_remove = Users.query.get_or_404(id)
+    posts = list(user_to_remove.posts)
     name = None
     form = RegisterForm()
     try:
+        for post in posts:
+            db.session.delete(post)
         db.session.delete(user_to_remove)
         db.session.commit()
         flash("User Removed Successfully")

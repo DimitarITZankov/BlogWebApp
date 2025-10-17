@@ -8,16 +8,16 @@
 </div>
 {% endfor %}
 
-{% if posts %}
-<center><h3>Check all posts here:</h3><br/><br/><br/></center>
+{% if my_posts %}
+<center><h3>Check out all your posts here:</h3></center><br/><br/><br/>
 {% else %}
-<center><h3>Currently there are no posts! You have the chance to be the first poster !!!</h3></center><br/><br/>
+<center><h3>You don't have any posts!Post now : </center></h3><br/><br/><hr>
 <div class="d-grid gap-2 col-6 mx-auto">
   <a href="{{ url_for('add_post') }}" class="btn btn-secondary">Add Post</a>
 </div>
 {% endif %}
 
-{% for post in posts %}
+{% for post in my_posts %}
 <div class="shadow p-3 mb-5 bg-body-tertiary rounded position-relative" style="min-height: 180px;">
     <!-- Title and View button -->
     <div class="d-flex justify-content-between align-items-center">
@@ -26,18 +26,14 @@
     </div>
     <hr>
     <!-- Post content -->
-    {% if post.poster.name == current_user.name%}
-    <strong>Author: </strong> You <br/>
-    {%else%}
     <strong>Author: </strong> {{ post.poster.name }}<br/>
-    {%endif%}
     <strong>Content: </strong>{{ post.content }}<br/>
     <strong><small>Posted:</strong> {{ post.date_posted }}</small><br/><br/><br/>
 
     <!-- Bottom-left LIKE button -->
-    <a href="{{ url_for('like_post', id=post.id) }}" 
+    <a 
        class="btn btn-outline-danger btn-sm position-absolute" 
-        style="position: absolute; bottom: 10px; left: 10px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+        style="position: absolute; bottom: 10px; left: 10px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;cursor: default;">
        ❤️ {{ post.likes }}
     </a>
 

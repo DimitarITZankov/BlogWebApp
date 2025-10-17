@@ -1,6 +1,30 @@
 {%extends 'base.html'%}
 {%block content%}
 
-<h1>This Is The Temporary Main Page</h1>
+<center><h1>Welcome to DZBlog</h1><br/></center><hr>
+<h4>Your go-to platform for insightful blog posts.</h4><br/>
+<p>Explore the most popular and engaging content curated by our community.</p>
+{%for post in most_liked_posts%}
+<div class="shadow p-3 mb-5 bg-body-tertiary rounded position-relative" style="min-height: 180px;">
+    <!-- Title and View button -->
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Title:</h4> <strong>{{ post.title }}</strong>
+        <a href="{{ url_for('post', id=post.id) }}" class="btn btn-info btn-sm">View</a>
+    </div>
+    <hr>
+    <!-- Post content -->
+    <strong>Author: </strong> {{ post.poster.name }}<br/>
+    <strong>Content: </strong>{{ post.content }}<br/>
+    <strong><small>Posted:</strong> {{ post.date_posted }}</small><br/><br/><br/>
 
+    <!-- Bottom-left LIKE button -->
+    <a 
+       class="btn btn-outline-danger btn-sm position-absolute" 
+        style="position: absolute; bottom: 10px; left: 10px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;cursor: default;">
+       ❤️ {{ post.likes }}
+    </a>
+</div>
+
+
+{%endfor%}
 {% endblock %}

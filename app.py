@@ -64,6 +64,7 @@ class Posts(db.Model):
     date_posted = db.Column(db.DateTime,default=datetime.utcnow)
     #Create One to Many Relationship 
     poster_id = db.Column(db.Integer,db.ForeignKey('users.id'))
+    likes = db.Column(db.Integer,nullable=False,default=0,server_default="0")
 
 
 #Create A Login Form
@@ -93,7 +94,8 @@ class RegisterForm(FlaskForm):
 #Create The Main Page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    most_liked_posts = Posts.query.order_by(Posts.likes.desc()).limit(5).all()
+    return render_template('index.html',most_liked_posts=most_liked_posts)
 
 #Create Register Page
 @app.route('/register',methods=["POST","GET"])
@@ -139,6 +141,7 @@ def remove_user(id):
 @login_required
 def dashboard():
     form = RegisterForm()
+    all_users = Users.query.order_by(Users.username)
     id = current_user.id  
     name_to_edit = Users.query.get_or_404(id)
     if request.method == "POST":
@@ -150,16 +153,16 @@ def dashboard():
             db.session.commit()
             flash("Editted User Successfully")
             return render_template("dashboard.html",form=form,
-                name_to_edit=name_to_edit,id=id)
+                name_to_edit=name_to_edit,id=id,all_users=all_users)
         except:
             flash("ERROR..Try Again!")
             return render_template("dashboard.html",form=form,
-                name_to_edit=name_to_edit,id=id)
+                name_to_edit=name_to_edit,id=id,all_users=all_users)
 
     else:
         return render_template("dashboard.html",form=form,
-                name_to_edit=name_to_edit,id=id)
-    return render_template('dashboard.html',form=form)
+                name_to_edit=name_to_edit,id=id,all_users=all_users)
+    return render_template('dashboard.html',form=form,all_users=all_users)
 
 
 
@@ -187,7 +190,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("You have been logged out")
+    flash("Logged out! See  you again")
     return redirect(url_for('login'))
 
 #Create Edit User Function
@@ -217,7 +220,7 @@ def add_post():
     form = PostForm()
     if form.validate_on_submit():
         poster = current_user.id 
-        post = Posts(title=form.title.data,content=form.content.data,poster_id=poster,)
+        post = Posts(title=form.title.data,content=form.content.data,poster_id=poster,likes=0)
         #Clear The Form
         form.title.data = ''
         form.content.data = ''
@@ -230,7 +233,7 @@ def add_post():
 #Create Route For Posts
 @app.route('/posts')
 def posts():
-    posts = Posts.query.order_by(Posts.date_posted).all()
+    posts = Posts.query.order_by(Posts.date_posted)
     return render_template("posts.html",posts=posts)
 
 
@@ -282,3 +285,33 @@ def post(id):
     post_to_view = Posts.query.get_or_404(id)
     return render_template('post.html',post_to_view=post_to_view)
 
+#Create "Like-A-Post" function
+@app.route('/like_post/<int:id>')
+@login_required
+def like_post(id):
+    post_to_like = Posts.query.get_or_404(id)
+    try:
+        post_to_like.likes += 1
+        db.session.commit()
+        flash("Post Liked Successfully")
+        return redirect(url_for('posts'))
+    except:
+        flash("Something went wrong! Please try again...")
+        return redirect(url_for('posts'))
+
+
+#Create my_posts route
+@app.route('/my_posts')
+@login_required
+def my_posts():
+    my_posts = Posts.query.filter_by(poster_id=current_user.id).order_by(Posts.date_posted.desc()).all()
+    return render_template('my_posts.html',my_posts=my_posts)
+
+#Create Statistics function
+@app.route('/statistics/<int:id>')
+@login_required
+def statistics(id):
+    user_statistics = Users.query.get_or_404(id)
+    total_likes = sum(post.likes for post in user_statistics.posts)
+    total_posts = len(user_statistics.posts)
+    return render_template('statistics.html',total_likes=total_likes,total_posts=total_posts,user=user_statistics)

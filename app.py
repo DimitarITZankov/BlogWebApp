@@ -1,6 +1,6 @@
 from flask import Flask,render_template,redirect,url_for,request,flash
 from flask_wtf import FlaskForm
-from wtforms import StringField,SubmitField,PasswordField,BooleanField,ValidationError
+from wtforms import StringField,SubmitField,PasswordField,BooleanField,ValidationError,TextAreaField
 from wtforms.validators import DataRequired,EqualTo,Length
 from wtforms.widgets import TextArea
 from flask_sqlalchemy import SQLAlchemy
@@ -8,7 +8,7 @@ import os
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import UserMixin,login_user,LoginManager,login_required,logout_user,current_user
-
+from datetime import datetime
 
 
 #Create The App
@@ -31,7 +31,7 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
-#Create Database Table
+#Create Users Database Table
 class Users(db.Model,UserMixin):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(80),nullable=False)
@@ -39,6 +39,8 @@ class Users(db.Model,UserMixin):
     email = db.Column(db.String(80),nullable=False,unique=True)
     secret_word = db.Column(db.String(20),nullable=False)
     password_hash = db.Column(db.String(128))
+    posts = db.relationship('Posts',backref='poster')
+
     #Setting Up Hash Passwords
     @property
     def password(self):
@@ -54,12 +56,29 @@ class Users(db.Model,UserMixin):
         return '<Name %r>' % self.name
 
 
+#Create Posts Database Table
+class Posts(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    title =db.Column(db.String(40),nullable=False)
+    content = db.Column(db.Text,nullable=False)
+    date_posted = db.Column(db.DateTime,default=datetime.utcnow)
+    #Create One to Many Relationship 
+    poster_id = db.Column(db.Integer,db.ForeignKey('users.id'))
+
+
 #Create A Login Form
 class LoginForm(FlaskForm):
     username = StringField("Username",validators=[DataRequired()])
     password_hash = PasswordField("Password",validators=[DataRequired()])
     submit = SubmitField("Login")
 
+
+#Create a Post Form
+class PostForm(FlaskForm):
+    title = StringField("Title",validators=[DataRequired()])
+    author = StringField("Author")
+    content = TextAreaField("Content",validators=[DataRequired()])
+    submit = SubmitField("Post")
 
 #Create A Register Form
 class RegisterForm(FlaskForm):
@@ -190,4 +209,76 @@ def edit_user(id):
             return render_template('edit_user.html',form=form,name_to_edit=name_to_edit,id=id)
     else:
         return render_template('edit_user.html',form=form,name_to_edit=name_to_edit,id=id)
+
+#Create add_post Route
+@app.route('/add_post',methods=["GET","POST"])
+@login_required
+def add_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        poster = current_user.id 
+        post = Posts(title=form.title.data,content=form.content.data,poster_id=poster,)
+        #Clear The Form
+        form.title.data = ''
+        form.content.data = ''
+        #Add To Database
+        db.session.add(post)
+        db.session.commit()
+        flash("Blog Uploaded Successfully")
+    return render_template("add_post.html",form=form)
+
+#Create Route For Posts
+@app.route('/posts')
+def posts():
+    posts = Posts.query.order_by(Posts.date_posted).all()
+    return render_template("posts.html",posts=posts)
+
+
+#Create delete_post function
+@app.route('/delete_post/<int:id>')
+def delete_post(id):
+    post_to_delete = Posts.query.get_or_404(id)
+    id = current_user.id
+    if id == post_to_delete.poster_id:
+        try:
+            db.session.delete(post_to_delete)
+            db.session.commit()
+            flash("Post Deleted Successfully ")
+            posts = Posts.query.order_by(Posts.date_posted)
+            return render_template('posts.html',posts=posts)
+        except:
+            flash("Something wen't wrong! Please try again")
+            posts = Posts.query.order_by(Posts.date_posted)
+            return render_template('posts.html',posts=posts)
+    else:
+        flash("You aren't authorized to delete that post")
+        posts = Posts.query.order_by(Posts.date_posted)
+        return render_template("posts.html",posts=posts)
+
+#Create Edit Post Function
+@app.route('/edit_post/<int:id>',methods=["POST","GET"])
+def edit_post(id):
+    form = PostForm()
+    post_to_edit = Posts.query.get_or_404(id) 
+    if form.validate_on_submit():
+        post_to_edit.title = form.title.data
+        post_to_edit.content = form.content.data
+        db.session.add(post_to_edit)
+        db.session.commit()
+        flash("Successfully Editted The Post")
+        return redirect(url_for('posts',id=post_to_edit.id))
+    if current_user.id == post_to_edit.poster_id:
+        form.title.data = post_to_edit.title
+        form.content.data = post_to_edit.content
+        return render_template('edit_post.html',form=form)
+    else:
+        flash("You aren't authorized to edit that post")
+        posts = Posts.query.order_by(Posts.date_posted)
+        return render_template('posts.html',posts=posts)
+
+#Create a Route for viewing post
+@app.route('/post/<int:id>')
+def post(id):
+    post_to_view = Posts.query.get_or_404(id)
+    return render_template('post.html',post_to_view=post_to_view)
 

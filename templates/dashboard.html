@@ -6,7 +6,11 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endfor %}
-<center><h2>Welcome to your dashboard</h2></center>
+<div class="container d-flex justify-content-center my-5">
+    <div class="bg-light p-4 rounded shadow text-center">
+    <h2>Welcome to your dashboard</h2>
+  </div>
+</div>
 <div class="dropdown" style="position: fixed; top: 70px; left: 10px; z-index: 1000;">
   <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
     My Personal Menu
@@ -14,7 +18,7 @@
   <ul class="dropdown-menu">
     <li><a class="dropdown-item" href="{{ url_for('my_posts')}}">My Posts</a></li>
     <li><a class="dropdown-item" href="{{ url_for('statistics',id=current_user.id)}}">View My Statistics</a></li>
-    <li><a class="dropdown-item" href="#">Settings</a></li>
+    <li><a class="dropdown-item" href="">Coming Soon</a></li>
   </ul>
 </div>
 

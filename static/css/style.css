@@ -1,0 +1,7 @@
+body {
+  background-image: url('../images/background.jpeg'); /* path is relative to the CSS file */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh; /* ensures it covers full screen */
+}

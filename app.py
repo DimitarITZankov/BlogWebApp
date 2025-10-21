@@ -137,7 +137,7 @@ def remove_user(id):
     except:
         flash("Whoops!Something Went Wrong,Please Try Again.")
         return render_template('register.html',form=form,all_users=all_users,name=name)
-
+    redirect(url_for("dashboard"))
 
 #Create Dashboard Page
 @app.route('/dashboard',methods=["GET","POST"])
@@ -318,3 +318,9 @@ def statistics(id):
     total_likes = sum(post.likes for post in user_statistics.posts)
     total_posts = len(user_statistics.posts)
     return render_template('statistics.html',total_likes=total_likes,total_posts=total_posts,user=user_statistics)
+
+
+#Adding Error Handler 404
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404

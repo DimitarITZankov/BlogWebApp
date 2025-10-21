@@ -1,9 +1,12 @@
 {%extends 'base.html'%}
 {%block content%}
-
+<div class="container d-flex justify-content-center my-5">
+    <div class="bg-light p-4 rounded shadow text-center">
 <center><h1>Welcome to DZBlog</h1><br/></center><hr>
 <h4>Your go-to platform for insightful blog posts.</h4><br/>
 <p>Explore the most popular and engaging content curated by our community.</p>
+</div>
+</div>
 {%for post in most_liked_posts%}
 <div class="shadow p-3 mb-5 bg-body-tertiary rounded position-relative" style="min-height: 180px;">
     <!-- Title and View button -->

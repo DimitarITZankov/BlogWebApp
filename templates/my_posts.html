@@ -7,7 +7,8 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endfor %}
-
+<div class="container d-flex justify-content-center my-5">
+    <div class="bg-light p-4 rounded shadow text-center">
 {% if my_posts %}
 <center><h3>Check out all your posts here:</h3></center><br/><br/><br/>
 {% else %}
@@ -16,7 +17,7 @@
   <a href="{{ url_for('add_post') }}" class="btn btn-secondary">Add Post</a>
 </div>
 {% endif %}
-
+</div></div>
 {% for post in my_posts %}
 <div class="shadow p-3 mb-5 bg-body-tertiary rounded position-relative" style="min-height: 180px;">
     <!-- Title and View button -->

@@ -1,3 +1,5 @@
+SOON WILL BE ADDED MMORE FEATURES | STILL WORKING ON ..
+
 #BlogWebApp
 
 === Features ===
